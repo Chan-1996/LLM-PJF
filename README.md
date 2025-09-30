@@ -2,4 +2,4 @@
 
 ### File
 - prompt/jd_ensemble_prompt.txt: the prompt template used for LLM-based data augmentation.
-- model/Our
+- model/OurPJF.py: code of our method.
