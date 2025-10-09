@@ -16,7 +16,7 @@ class MoELayer(nn.Module):
         super(MoELayer, self).__init__()
         self.num_experts = num_experts
         
-        self.total_input_size = input_size * 8 + 16   # 8个embedding拼接后的总维度, 加上职类向量
+        self.total_input_size = input_size * 8 + 16   # eight representations output from the fine-grained interaction module + category embedding
         self.gate = nn.Sequential(
                     nn.Linear(16, 8),
                     nn.ReLU(),
