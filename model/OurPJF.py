@@ -26,7 +26,7 @@ class MoELayer(nn.Module):
         )
         
         
-        # 专家网络
+        # network of experts
         self.experts = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(self.total_input_size, hidden_size),
@@ -74,15 +74,15 @@ class AttentionAggregator(nn.Module):
         )
         self.norm2 = nn.LayerNorm(input_dim)
         
-        # 融合层
+        # feature fusion layer
         self.fusion = nn.Linear(input_dim * 2, input_dim)
         
     def forward(self, origin, target):
         attn_out, _ = self.attention(origin, target, target)
-        out = self.norm(attn_out + target) # 残差连接
+        out = self.norm(attn_out + target) # residual connection
         
         attn_out_2, _ = self.attention2(target, origin, origin)
-        out_2 = self.norm2(attn_out_2 + origin) # 残差连接
+        out_2 = self.norm2(attn_out_2 + origin) # residual connection
         
         concat_out = torch.cat([out, out_2], dim=-1)
         
@@ -377,7 +377,7 @@ class OurPJF(nn.Module):
                         neg_user_vec, neg_his_arr_eval_item_vec, neg_his_eval_pass_item_vec, neg_his_intv_pass_item_vec,\
                       user_cate, item_cate, neg_user_cate):
         
-        # 职类向量获取
+        # category embedding
         user_cate_emb = self.cate_emb(user_cate).squeeze(1)
         
         item_cate_emb = self.cate_emb(item_cate).squeeze(1)
@@ -407,7 +407,7 @@ class OurPJF(nn.Module):
             
         neg_score = self.moe_layer(neg_user_emb, item_emb, neg_f_i_1, neg_g_i_1, neg_f_i_2, neg_g_i_2, neg_f_i_3, neg_g_i_3, neg_cate_emb)
         
-        # 计算BPR损失
+        # compute the BPR loss
         
         loss = -torch.log(torch.sigmoid(pos_score - neg_score) + 1e-10).mean() + \
        0.1 * (torch.pow(pos_score, 2).mean() + torch.pow(neg_score, 2).mean())
@@ -420,7 +420,6 @@ class OurPJF(nn.Module):
                         user_cate, item_cate, type='dev'):
         if type == 'dev':
             
-            # 计算_forward_E
             score_E = self._forward_E(user_vec, item_vec)
             
             user_cate_emb = self.cate_emb(user_cate).squeeze(1)
